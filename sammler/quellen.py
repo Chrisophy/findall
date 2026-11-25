@@ -38,9 +38,11 @@ QUELLEN = [
     {
         'datei': 'netzkino',
         'prio': 20,
-        'budget': 1500,
+        'budget': 2400,
+        'max_aufrufe': 2500,
         'starts': [
             {'art': 'film', 'pick': 'Alle Filme A - Z', 'func': 'showEntries', 'url': 'alle-filme', 'max_seiten': 200},
+            {'art': 'film', 'pick': 'Genres', 'func': 'showGenres', 'genre_tiefe': 1, 'nur': ['showEntries'], 'max_seiten': 60},
             {'art': 'serie', 'pick': 'Serien', 'func': 'showEntries', 'url': 'serien'},
         ],
     },
