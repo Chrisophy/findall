@@ -1,1 +1,42 @@
+name: Automatisch ZIP entpackt
 
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: ZIP-Datei suchen und entpacken
+        run: |
+          for f in *.zip; do
+            if [ -f "$f" ]; then
+              echo "Entpacke $f..."
+              unzip -o "$f"
+              rm "$f"
+            fi
+          done
+
+          # Löscht die eingeschmuggelten Workflow-Dateien aus der ZIP,
+          # damit GitHub den Push nicht wegen fehlender Workflow-Rechte blockiert.
+          rm -f .github/workflows/android-apk.yml
+          rm -f .github/workflows/pages.yml
+          
+          # Räumt eventuell leere Ordner auf
+          find .github/workflows -type d -empty -delete
+          find .github -type d -empty -delete
+
+      - name: Änderungen committen und pushen
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automatisch ZIP entpackt [skip ci]" && git push)
