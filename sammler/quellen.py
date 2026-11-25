@@ -42,14 +42,6 @@ QUELLEN = [
         ],
     },
     {
-        'datei': 'tele5',
-        'prio': 25,
-        'starts': [
-            {'art': 'film', 'pick': 'Filme', 'genre_tiefe': 1},
-            {'art': 'serie', 'pick': 'Serien', 'serien_tiefe': 1},
-        ],
-    },
-    {
         'datei': 'wedotv',
         'prio': 30,
         'starts': [
