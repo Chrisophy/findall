@@ -63,6 +63,28 @@ jobs:
           key: profil-${{ github.run_id }}
           restore-keys: profil-
 
+      - name: Standort prüfen
+        env:
+          KATALOG_PROXY: ${{ secrets.KATALOG_PROXY }}
+        run: |
+          DIREKT=$(curl -s -m 15 https://ipinfo.io/country || true)
+          echo "Ohne Proxy: ${DIREKT:-unbekannt}"
+          {
+            echo '## Standort des Laufs'
+            echo ''
+            echo "Ohne Proxy: ${DIREKT:-unbekannt}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$KATALOG_PROXY" ]; then
+            MITPROXY=$(curl -s -m 20 -x "$KATALOG_PROXY" https://ipinfo.io/country || true)
+            echo "Mit Proxy: ${MITPROXY:-fehlgeschlagen}"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Mit Proxy: ${MITPROXY:-fehlgeschlagen}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Kein Proxy hinterlegt"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Kein Proxy hinterlegt (KATALOG_PROXY ist leer)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Sammeln
         env:
           KATALOG_PROXY: ${{ secrets.KATALOG_PROXY }}
