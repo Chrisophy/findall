@@ -27,9 +27,12 @@ try:
     PAUSE = max(0.0, float(os.environ.get('MS_PAUSE') or 0.1))
 except Exception:
     PAUSE = 0.1
+try:
+    KOPFZEILEN = {str(k): str(v) for k, v in dict(_json.loads(os.environ.get('MS_KOPFZEILEN') or '{}')).items()}
+except Exception:
+    KOPFZEILEN = {}
 _LOCK = threading.Lock()
 _LETZTE = {}
-HOOK = None
 
 
 def _zaehle(url):
@@ -49,6 +52,9 @@ class ZaehlHandler(urllib.request.BaseHandler):
     handler_order = 100
 
     def http_request(self, req):
+        for k, v in KOPFZEILEN.items():
+            if not req.has_header(k.capitalize()):
+                req.add_header(k, v)
         _zaehle(req.full_url)
         return req
 
