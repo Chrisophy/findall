@@ -1,1 +1,0 @@
-Eigene oder geänderte Scraper hier ablegen. Sie haben Vorrang vor denen aus dem Scraper-Repo.
