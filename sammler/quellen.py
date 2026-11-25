@@ -2,6 +2,9 @@
 # zusatzmetall | IT('s) Possible
 # 2026.11.25
 
+DE_IP = '91.12.34.56'
+DEUTSCHLAND = {'X-Forwarded-For': DE_IP}
+
 ALLGEMEIN = {
     'parallel': 4,
     'budget': 900,
@@ -52,12 +55,14 @@ QUELLEN = [
     {
         'datei': 'plutotv',
         'prio': 40,
+        'kopfzeilen': DEUTSCHLAND,
         'starts': [
             {'art': 'film', 'func': '_rest_genres', 'args': ['movie'], 'genre_tiefe': 1,
              'alt': {'pick': 'Filme', 'func': 'showGenres', 'url': 'movies', 'genre_tiefe': 1}},
             {'art': 'serie', 'func': '_rest_genres', 'args': ['show'], 'genre_tiefe': 1,
              'alt': {'pick': 'Serien', 'func': 'showGenres', 'url': 'shows', 'genre_tiefe': 1}},
-            {'art': 'live', 'pick': 'Live TV', 'func': 'get_live', 'url': 'live'},
+            {'art': 'live', 'func': 'get_live_channels', 'url': 'channels:de:__all__',
+             'alt': {'pick': 'Live TV', 'func': 'get_live', 'url': 'live'}},
         ],
     },
     {
@@ -72,9 +77,12 @@ QUELLEN = [
     {
         'datei': 'plexfree',
         'prio': 50,
+        'budget': 300,
+        'max_aufrufe': 120,
+        'kopfzeilen': DEUTSCHLAND,
         'einstellungen': {'general.german_only': 'true'},
         'starts': [
-            {'art': 'mix', 'pick': 'Entdecken & Kategorien', 'func': 'load', 'url': 'hubs', 'genre_tiefe': 1, 'max_seiten': 15},
+            {'art': 'mix', 'pick': 'Entdecken & Kategorien', 'func': 'load', 'url': 'hubs', 'genre_tiefe': 1, 'max_seiten': 4},
             {'art': 'live', 'pick': 'Live TV - Deutsch', 'func': 'load', 'url': 'live_de'},
         ],
     },

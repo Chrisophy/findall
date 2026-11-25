@@ -31,6 +31,7 @@ _SUCHTITEL = re.compile(r'^\W*(?:suche|suchen|search|globale suche|suche nach)\b
 _SEITE = re.compile(r'(weiter|n[äa]chste|weitere\s+(?:ergebnisse|eintr)|mehr laden|next page|seite\s*\d)', re.I)
 _JAHR = re.compile(r'\b(19[0-9]{2}|20[0-9]{2})\b')
 _LIVE_SCHNITT = re.compile(r'\s+(?:–|—|\||·)\s+.*$')
+_LIVE_NUMMER = re.compile(r'^\s*\d{1,5}(?:\s*\||\s+[–-])\s*')
 _OHNE = {'search', 'do_search', 'clear_cache', 'nothing', 'settings', 'ms_settings', 'toggle'}
 _ARTIKEL = re.compile(r'^(?:der|die|das|the|a|an|ein|eine|le|la|les|el)\s+')
 
@@ -469,7 +470,8 @@ class Lauf:
                     alt['g'].append(x)
 
     def merke_live(self, it, titel, gruppe):
-        t = _LIVE_SCHNITT.sub('', titel).strip() or titel
+        t = _LIVE_NUMMER.sub('', titel).strip() or titel
+        t = _LIVE_SCHNITT.sub('', t).strip() or t
         r = {'t': t, 'u': '' if it.get('url') is None else str(it.get('url')), 'nf': str(it.get('next_func') or 'get_hosters')}
         pa = it.get('params') if isinstance(it.get('params'), dict) else None
         if pa:
@@ -626,6 +628,7 @@ def starte(q, pfad, a, allg, tmp):
     env = dict(os.environ)
     env['MS_PROFIL'] = profil
     env['MS_EINSTELLUNGEN'] = json.dumps(q.get('einstellungen') or {})
+    env['MS_KOPFZEILEN'] = json.dumps(q.get('kopfzeilen') or {})
     env['MS_PAUSE'] = str(q.get('pause', allg.get('pause', 0.1)))
     env['PYTHONIOENCODING'] = 'utf-8'
     env['PYTHONDONTWRITEBYTECODE'] = '1'
@@ -703,7 +706,10 @@ def auswerten(q, erg, alt_dir, aus_dir, heute, allg):
         hinweise.append(log_ende(erg['log']) or 'kein Ergebnis')
     if neu and not sum(len(neu.get(k) or []) for k in ('filme', 'serien', 'live')):
         hinweise.append('keine Einträge erhalten (%d Anfragen, %d davon fehlerhaft)' % (neu.get('anfragen', 0), neu.get('http_fehler', 0)))
-    daten = {'sid': sid, 'name': name, 'domain': domain, 'datei': datei, 'stand': heute_s, 'filme': [], 'serien': [], 'live': []}
+    sig = hashlib.sha1(json.dumps(q, sort_keys=True, ensure_ascii=False).encode('utf-8')).hexdigest()[:10]
+    alt_gleich = alt if (alt and alt.get('sig') == sig) else None
+    daten = {'sid': sid, 'name': name, 'domain': domain, 'datei': datei, 'stand': heute_s, 'sig': sig,
+             'filme': [], 'serien': [], 'live': []}
     gesamt_neu = sum(len((neu or {}).get(k) or []) for k in ('filme', 'serien', 'live'))
     if neu and gesamt_neu:
         teil = bool(neu.get('teil')) or not neu.get('fertig') or erg['zeitlimit']
@@ -712,7 +718,7 @@ def auswerten(q, erg, alt_dir, aus_dir, heute, allg):
             liste = list(neu.get(k) or [])
             for r in liste:
                 r['z'] = heute_s
-            alt_liste = (alt or {}).get(k) or []
+            alt_liste = (alt_gleich or {}).get(k) or []
             einbruch = bool(alt_liste) and (not liste or (len(alt_liste) >= 10 and len(liste) < len(alt_liste) * 0.5))
             if teil or einbruch:
                 if einbruch and not teil:
@@ -725,6 +731,7 @@ def auswerten(q, erg, alt_dir, aus_dir, heute, allg):
         for k in ('filme', 'serien', 'live'):
             daten[k] = kombinieren([], alt.get(k) or [], grenze)
         daten['stand'] = alt.get('stand') or ''
+        daten['sig'] = alt.get('sig') or ''
         hinweise.insert(0, 'Abruf fehlgeschlagen, Daten vom %s' % (daten['stand'] or '?'))
     else:
         status = 'fehler'
