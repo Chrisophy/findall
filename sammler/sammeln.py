@@ -341,6 +341,8 @@ class Lauf:
     def _start(self, st):
         if st.get('roh') == 'gez':
             return self.roh_gez(st)
+        if st.get('roh') == 'plex':
+            return self.roh_plex(st)
         wurzel = None
         if st.get('pick'):
             f = self.pick(st['pick'])
@@ -522,6 +524,78 @@ class Lauf:
             if g:
                 r['g'] = g
             self.filme.setdefault(schluessel(r), r)
+
+    def roh_plex(self, st):
+        m = self.mod
+        roh = getattr(m, '_plex_search_raw', None)
+        vorbereiten = getattr(m, '_prepare_items', None)
+        formen = getattr(m, '_format_plex_item', None)
+        token_fn = getattr(m, '_get_plex_guest_token', None)
+        if not (callable(roh) and callable(vorbereiten) and callable(formen) and callable(token_fn)):
+            raise RuntimeError('Plex-Funktionen fehlen')
+        token = token_fn()
+        if not token:
+            raise RuntimeError('kein Gast-Token')
+        gesehen = set()
+        offen = []
+        vorher = len(self.filme) + len(self.serien)
+        anfragen = 0
+
+        def verarbeiten(liste):
+            if not liste:
+                return
+            try:
+                behalten = vorbereiten(liste)
+            except Exception as e:
+                self.fehler.append('Plex-Auswahl: %s' % self._kurz(e))
+                return
+            for meta in behalten:
+                try:
+                    it = formen(meta, token)
+                except Exception:
+                    continue
+                if not it:
+                    continue
+                titel = sauber(it.get('title') or '')
+                mt = str(it.get('mediatype') or '').lower()
+                tags = meta.get('Genre') or []
+                if isinstance(tags, dict):
+                    tags = [tags]
+                g = genres_von([x.get('tag') for x in tags if isinstance(x, dict) and x.get('tag')])
+                if mt == 'movie' and titel:
+                    self.merke(self.filme, it, titel, g, 'get_hosters')
+                elif mt == 'tvshow':
+                    titel = re.sub(r'^\[Serie\]\s*', '', titel)
+                    if titel:
+                        self.merke(self.serien, it, titel, g, 'load')
+
+        for wort in st.get('suche') or []:
+            if self.zeit_um() or self.aufrufe >= self.max_aufrufe:
+                self.teil = True
+                break
+            self.aufrufe += 1
+            anfragen += 1
+            try:
+                res = roh(wort)
+            except Exception as e:
+                self.fehler.append('Plexsuche %s: %s' % (wort, self._kurz(e)))
+                continue
+            for meta in res or []:
+                if not isinstance(meta, dict):
+                    continue
+                k = str(meta.get('ratingKey') or meta.get('key') or '')
+                if not k or k in gesehen:
+                    continue
+                gesehen.add(k)
+                offen.append(meta)
+            if len(offen) >= 40:
+                verarbeiten(offen)
+                offen = []
+            if time.time() - self._geschrieben > 20:
+                self.schreiben()
+        verarbeiten(offen)
+        neu = len(self.filme) + len(self.serien) - vorher
+        self.fehler.insert(0, 'Info Plexsuche: %d Suchen, %d Treffer, %d neu im Katalog' % (anfragen, len(gesehen), neu))
 
     def schreiben(self):
         self._geschrieben = time.time()

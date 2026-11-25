@@ -5,6 +5,37 @@
 DE_IP = '91.12.34.56'
 DEUTSCHLAND = {'X-Forwarded-For': DE_IP}
 
+PLEX_SUCHE = [
+    'der', 'die', 'the', 'das', 'und', 'des', 'ein', 'auf', 'von', 'liebe', 'mit', 'teil', 'für', 'eine', 'ist',
+    'folge', 'den', 'leben', 'dem', 'zum', 'mein', 'weihnachten', 'nicht', 'aus', 'ich', 'man', 'love', 'nach',
+    'tod', 'christmas', 'glück', 'wir', 'war', 'geschichte', 'and', 'meine', 'mann', 'kleine', 'welt', 'zwei',
+    'alles', 'letzte', 'vom', 'hölle', 'rache', 'weltkrieg', 'geheimnis', 'wie', 'unter', 'gegen', 'familie',
+    'for', 'reich', 'immer', 'nacht', 'night', 'abenteuer', 'einer', 'episode', 'last', 'frauen', 'zur', 'kampf',
+    'dark', 'world', 'drei', 'große', 'time', 'all', 'alle', 'was', 'sie', 'vier', 'krieg', 'frau', 'berlin',
+    'missions', 'tödliche', 'sex', 'staffel', 'schlacht', 'oder', 'freund', 'reise', 'kein', 'bis', 'sind', 'ins',
+    'life', 'monster', 'dead', 'mord', 'ohne', 'kommt', 'dich', 'nur', 'new', 'lebens', 'zurück', 'legende',
+    'kinder', 'fall', 'dein', 'killer', 'shaolin', 'spione', 'agenten', 'red', 'story', 'hochzeit', 'weg', 'you',
+    'sein', 'herz', 'soldaten', 'deutschland', 'verlieben', 'wild', 'inside', 'erde', 'tage', 'durch', 'zeit',
+    'als', 'american', 'evil', 'tag', 'verliebt', 'zweite', 'shark', 'zwischen', 'dir', 'city', 'bei', 'wer',
+    'über', 'allein', 'house', 'deutsche', 'ende', 'traum', 'mutter', 'king', 'macht', 'wenn', 'west', 'death',
+    'haus', 'weihnachtsmann', 'spiel', 'bösen', 'star', 'mission', 'sommer', 'noch', 'männer', 'schatten', 'jagd',
+    'kann', 'mädchen', 'vor', 'andere', 'vater', 'keine', 'blood', 'big', 'gold', 'battle', 'tochter', 'himmel',
+    'eines', 'ihr', 'black', 'one', 'bvb', 'fast', 'engel', 'girls', 'hat', 'geht', 'herzen', 'einen', 'wieder',
+    'terror', 'land', 'unser', 'uns', 'girl', 'tiger', 'mary', 'papa', 'leidenschaft', 'jahre', 'from',
+    'traktoren', 'wunder', 'angst', 'hitler', 'island', 'mich', 'könig', 'wird', 'hitlers', 'zweiten', 'winnetou',
+    'with', 'freiheit', 'earth', 'agatha', 'christie', 'alien', 'road', 'tiefe', 'insel', 'vergangenheit',
+    'gesetz', 'park', 'wahrheit', 'bruce', 'operation', 'europa', 'django', 'winter', 'high', 'just', 'mom',
+    'zombie', 'days', 'letzten', 'dog', 'freunde', 'river', 'weißen', 'voll', 'morde', 'bin', 'giganten', 'york',
+    'einem', 'gestern', 'animal', 'wilden', 'angriff', 'mir', 'wahre', 'end', 'lee', 'todes', 'china', 'erste',
+    'einsatz', 'lady', 'evolution', 'serie', 'saison', 'seine', 'suche', 'afrika', 'devil', 'anfang', 'sonne',
+    'poltergeist', 'animals', 'wilde', 'spur', 'einmal', 'überleben', 'beast', 'meiner', 'kill', 'drachen',
+    'race', 'first', 'max', 'regionalliga', 'spieltag', 'tiere', 'bull', 'apocalypse', 'boy', 'hoffnung',
+    'spuren', 'zombies', 'lügen', 'ganz', 'cop', 'augen', 'killers', 'art', 'untergang', 'day', 'wars', 'baby',
+    'bescherung', 'plötzlich', 'zukunft', 'gibt', 'freundschaft', 'super', 'ferien', 'good', 'white', 'little',
+    'clark', 'teen', 'nie', 'attack', 'deine', 'heart', 'legend', 'santa', 'chance', 'kind', 'stadt', 'ärger',
+    'see', 'neue', 'amazing', 'sieben', 'horror'
+]
+
 ALLGEMEIN = {
     'parallel': 4,
     'budget': 900,
@@ -79,12 +110,13 @@ QUELLEN = [
     {
         'datei': 'plexfree',
         'prio': 50,
-        'budget': 300,
-        'max_aufrufe': 120,
+        'budget': 2400,
+        'max_aufrufe': 1000,
         'kopfzeilen': DEUTSCHLAND,
         'einstellungen': {'general.german_only': 'true'},
         'starts': [
-            {'art': 'mix', 'pick': 'Entdecken & Kategorien', 'func': 'load', 'url': 'hubs', 'genre_tiefe': 1, 'max_seiten': 4},
+            {'art': 'mix', 'pick': 'Entdecken & Kategorien', 'func': 'load', 'url': 'hubs', 'genre_tiefe': 1, 'max_seiten': 15},
+            {'art': 'mix', 'roh': 'plex', 'suche': PLEX_SUCHE},
             {'art': 'live', 'pick': 'Live TV - Deutsch', 'func': 'load', 'url': 'live_de'},
         ],
     },
